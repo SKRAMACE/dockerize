@@ -52,13 +52,22 @@ while [[ $# -gt 0 ]]; do
     esac
 done 
 
+metainfo="/usr/share/imhex/metainfo"
+if [ ! -d $metainfo ]; then
+    mkdir -p $metainfo
+    VOL="-v $metainfo:/host-metainfo"
+
+    # Copy internal metainfo to the host machine
+    docker run -it --rm  $VOL $IMAGE cp /usr/share/metainfo/* /host-metainfo/
+fi
+
 # Create temp dir for this run
 TEMP=$(mktemp -d -p $TEMPDIR)
 VOL="-v $TEMP:/host"
 VOL+=" -v /usr/share/imhex:/usr/share/imhex"
 VOL+=" -v /usr/local/share/imhex:/usr/local/share/imhex"
 VOL+=" -v /usr/share/licenses/imhex:/usr/share/licenses/imhex"
-VOL+=" -v /usr/share/imhex/metainfo:/usr/share/metainfo"
+VOL+=" -v $metainfo:/usr/share/metainfo"
 
 CMD="docker run -it --rm  $USE_GUI $VOL $IMAGE $ENTRY_CMD"
 if [ -v dryrun ]; then
