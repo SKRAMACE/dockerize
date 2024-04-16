@@ -1,0 +1,2 @@
+WORKDIR /app
+RUN rm -rf /opt/ImHex
