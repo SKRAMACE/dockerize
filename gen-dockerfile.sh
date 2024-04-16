@@ -220,16 +220,15 @@ clean_apt_cache() {
 }
 
 # Arg Parsing
-print_usage() {
+usage() {
     echo "Usage: $0 [OPTIONS] [NAME]"
     echo "Options:"
-    echo "  -i, --image [STRING]     default value ($gendocker_image)"
-    echo "  -g, --gui                default value (False)"
-    echo "  -h, --help               Display this help message"
-}
-
-usage() {
-    print_usage | column -t -s ","
+    echo "
+  -i,--image [STRING],default value ($gendocker_image)
+  -g,--gui,default value (False)
+  -h,--help,Display this help message
+  ,--no-build,Do not build docker container
+  ,--dryrun,Display this help message" | column -t -s ","
 }
 
 while [[ $# -gt 0 ]]; do
@@ -250,6 +249,12 @@ while [[ $# -gt 0 ]]; do
             ;;
         -g|--gui)
             gendocker_use_gui=True
+            ;;
+        --no-build)
+            nobuild=True
+            ;;
+        --dry-run)
+            dryrun=True
             ;;
         -*)
             echo "Error: Unknown option: $1" >&2
@@ -275,6 +280,11 @@ fi
 dockerfile="Dockerfile"
 if [ ! -z $gendocker_name ]; then
     dockerfile+=".$gendocker_name"
+fi
+
+if [ -v dryrun ]; then
+    dockerfile=$(mktemp -d -p /tmp)/$dockerfile
+    echo "DRYRUN MODE ON: Writing output to \"$dockerfile\""
 fi
 
 set_outfile $dockerfile
@@ -304,3 +314,15 @@ if [[ $(check_boolean $gendocker_use_gui) == "true" ]]; then
 fi
 
 clean_apt_cache
+
+if [ -v dryrun ]; then
+    cat $dockerfile
+    exit 0
+fi
+
+if [ -v nobuild ]; then
+    echo "--no-build: Skipping docker container build"
+    exit 0
+fi
+
+docker build -t gendocker_name -f $dockerfile .
