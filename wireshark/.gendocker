@@ -1,0 +1,26 @@
+#!/bin/bash
+
+gendocker_name="wireshark"
+gendocker_cmd="wireshark"
+gendocker_image="ubuntu:22.04"
+gendocker_use_gui=True
+
+git_repo_target_dir=/opt/wireshark
+git_repo="https://gitlab.com/wireshark/wireshark.git"
+
+pre_build_apt_get=(\
+    "git"
+)
+
+pre_build_workdir=$git_repo_target_dir/tools
+pre_build_cmds=(\
+    "chmod +x debian-setup.sh" \
+    "./debian-setup.sh -y --install-all" \
+)
+
+build_workdir=$git_repo_target_dir/build
+build_cmds=(\
+    "cmake .." \
+    "make -j8" \
+    "make install"
+)
