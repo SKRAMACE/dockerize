@@ -1,6 +1,7 @@
 #!/bin/bash
 
 IMAGE="imhex"
+CONTAINER="imhex"
 ENTRY_CMD="imhex"
 
 # For using GUI
@@ -52,24 +53,42 @@ while [[ $# -gt 0 ]]; do
     esac
 done 
 
-metainfo="/usr/share/imhex/metainfo"
-if [ ! -d $metainfo ]; then
-    mkdir -p $metainfo
-    VOL="-v $metainfo:/host-metainfo"
-
-    # Copy internal metainfo to the host machine
-    docker run -it --rm  $VOL $IMAGE cp /usr/share/metainfo/* /host-metainfo/
+metainfo_dir="/usr/share/imhex/metainfo"
+if [ ! -d $metainfo_dir ]; then
+    echo "Initializing metainfo directory ($metainfo_dir)"
+    sudo mkdir -p $metainfo
 fi
 
+metainfo_xml=(\
+    $metainfo_dir/net.werwolv.imhex.appdata.xml \
+    $metainfo_dir/net.werwolv.imhex.metainfo.xml \
+)
+for m in ${metainfo_xml[@]}; do
+    if [ -f $m ]; then
+        continue
+    fi
+
+    echo "Copying: $m"
+    # Copy internal metainfo to the host machine
+    VOL="-v $metainfo_dir:/host-metainfo"
+    metainfo_dir_internal="/usr/share/metainfo"
+    src=$metainfo_dir_internal/$(basename $m)
+    docker run --rm  $VOL $IMAGE cp $src /host-metainfo/
+done
+
 # Create temp dir for this run
-TEMP=$(mktemp -d -p $TEMPDIR)
-VOL="-v $TEMP:/host"
+VOL="-v /usr/local/imhex:/host"
 VOL+=" -v /usr/share/imhex:/usr/share/imhex"
 VOL+=" -v /usr/local/share/imhex:/usr/local/share/imhex"
 VOL+=" -v /usr/share/licenses/imhex:/usr/share/licenses/imhex"
-VOL+=" -v $metainfo:/usr/share/metainfo"
+VOL+=" -v $metainfo_dir:/usr/share/metainfo"
 
-CMD="docker run -it --rm  $USE_GUI $VOL $IMAGE $ENTRY_CMD"
+if docker ps -a --format '{{.Names}}' | grep -q "^$CONTAINER$"; then
+    CMD="docker start $CONTAINER"
+else
+    CMD="docker run --name $CONTAINER $USE_GUI $VOL $IMAGE $ENTRY_CMD"
+fi
+
 if [ -v dryrun ]; then
     echo $CMD
 else
