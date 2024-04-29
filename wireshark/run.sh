@@ -21,6 +21,7 @@ print_usage() {
     echo "Usage: $0 [OPTIONS]"
     echo "Options:"
     echo "  -h, --help               Display this help message"
+    echo "  -p, --pcaps              Mount directory to /pcaps in docker container"
     echo "      --dry-run            Print command, but don't run"
 }
 
@@ -35,6 +36,10 @@ while [[ $# -gt 0 ]]; do
         -h|--help)
             usage
             exit 1
+            ;;
+        -p|--pcaps)
+            pcaps=$1
+            shift
             ;;
         --dry-run)
             dryrun=True
@@ -53,9 +58,14 @@ while [[ $# -gt 0 ]]; do
 done 
 
 # Create temp dir for this run
-TEMP=$(mktemp -t $TEMPDIR -d)
+TEMP=$(mktemp -p $TEMPDIR -d)
 
 VOL="-v $TEMP:/host"
+if [ -v pcaps ]; then
+    if [ -d $pcaps ]; then
+        VOL+=" -v $pcaps:/pcaps"
+    fi
+fi
 
 CMD="docker run --rm $USE_GUI $VOL $IMAGE $ENTRY_CMD"
 
