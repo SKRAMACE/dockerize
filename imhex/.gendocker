@@ -2,7 +2,7 @@
 
 gendocker_name="imhex"
 gendocker_cmd="ImHex"
-gendocker_image="ubuntu:22.04"
+gendocker_base_image="ubuntu:22.04"
 gendocker_use_gui=True
 
 git_repo_target_dir=/opt/ImHex

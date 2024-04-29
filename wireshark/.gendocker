@@ -2,7 +2,7 @@
 
 gendocker_name="wireshark"
 gendocker_cmd="wireshark"
-gendocker_image="ubuntu:22.04"
+gendocker_base_image="ubuntu:22.04"
 gendocker_use_gui=True
 
 git_repo_target_dir=/opt/wireshark

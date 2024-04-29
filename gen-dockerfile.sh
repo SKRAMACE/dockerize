@@ -12,10 +12,17 @@ if [ -e $conf ]; then
 fi
 
 # Default Values
-if [ -v GENDOCKER_IMAGE ]; then
-    gendocker_image=$GENDOCKER_IMAGE
+if [ -v GENDOCKER_BASE_IMAGE ]; then
+    gendocker_image=$GENDOCKER_BASE_IMAGE
 elif [ ! -v gendocker_image ]; then
     gendocker_image="ubuntu:latest"
+fi
+
+# Default Values
+if [ -v GENDOCKER_TAG ]; then
+    gendocker_tag=$GENDOCKER_TAG
+elif [ ! -v gendocker_tag ]; then
+    gendocker_tag="latest"
 fi
 
 if [ -v GENDOCKER_TIMEZONE ]; then
@@ -25,7 +32,7 @@ elif [ ! -v timezone ]; then
 fi
 
 if [ -v GENDOCKER_USE_GUI ]; then
-    gendocker_use_gui=$GENDOCKER_IMAGE
+    gendocker_use_gui=$GENDOCKER_USE_GUI
 elif [ ! -v gendocker_use_gui ]; then
     gendocker_use_gui="False"
 fi
@@ -224,11 +231,13 @@ usage() {
     echo "Usage: $0 [OPTIONS] [NAME]"
     echo "Options:"
     echo "
-  -i,--image [STRING],default value ($gendocker_image)
-  -g,--gui,default value (False)
-  -h,--help,Display this help message
-  ,--no-build,Do not build docker container
-  ,--dryrun,Display this help message" | column -t -s ","
+  -i,--image    [STRING]    Base image used in FROM command (default = $gendocker_image)
+  -t,--tag  [STRING]    Tag for output image (default = $gendocker_tag)
+  -g,--gui  [BOOL]  Build with GUI option (default value = False)
+  -z,--timezone [STRING]    Timezone for apt-get (default value = UTC)
+  -h,--help     Display this help message
+     --no-build     Do not build docker container
+     --dryrun       Print generated docker container and build command" | column -t -s "\t"
 }
 
 while [[ $# -gt 0 ]]; do
@@ -243,7 +252,11 @@ while [[ $# -gt 0 ]]; do
             gendocker_image="$1"
             shift
             ;;
-        -t|--timezone)
+        -t|--tag)
+            image_tag="$1"
+            shift
+            ;;
+        -z|--timezone)
             timezone="$1"
             shift
             ;;
@@ -315,14 +328,20 @@ fi
 
 clean_apt_cache
 
+build_cmd="docker build -t $gendocker_name:$gendocker_tag -f $dockerfile ."
 if [ -v dryrun ]; then
+    echo "$dockerfile:"
     cat $dockerfile
+    echo ""
+    echo "Build Command:"
+    echo "$build_cmd"
     exit 0
 fi
 
 if [ -v nobuild ]; then
-    echo "--no-build: Skipping docker container build"
+    echo "--no-build: Skipping docker image build"
     exit 0
 fi
 
-docker build -t gendocker_name -f $dockerfile .
+# Build the docker image
+$build_cmd
