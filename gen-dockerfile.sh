@@ -13,9 +13,9 @@ fi
 
 # Default Values
 if [ -v GENDOCKER_BASE_IMAGE ]; then
-    gendocker_image=$GENDOCKER_BASE_IMAGE
-elif [ ! -v gendocker_image ]; then
-    gendocker_image="ubuntu:latest"
+    gendocker_base_image=$GENDOCKER_BASE_IMAGE
+elif [ ! -v gendocker_base_image ]; then
+    gendocker_base_image="ubuntu:latest"
 fi
 
 # Default Values
@@ -71,7 +71,7 @@ append_section() {
 
 from() {
     append_section "$(cat <<EOF
-FROM $gendocker_image
+FROM $gendocker_base_image
 EOF
 )"
 }
@@ -231,7 +231,7 @@ usage() {
     echo "Usage: $0 [OPTIONS] [NAME]"
     echo "Options:"
     echo "
-  -i,--image    [STRING]    Base image used in FROM command (default = $gendocker_image)
+  -i,--image    [STRING]    Base image used in FROM command (default = $gendocker_base_image)
   -t,--tag  [STRING]    Tag for output image (default = $gendocker_tag)
   -g,--gui  [BOOL]  Build with GUI option (default value = False)
   -z,--timezone [STRING]    Timezone for apt-get (default value = UTC)
@@ -249,7 +249,7 @@ while [[ $# -gt 0 ]]; do
             exit 1
             ;;
         -i|--image)
-            gendocker_image="$1"
+            gendocker_base_image="$1"
             shift
             ;;
         -t|--tag)
