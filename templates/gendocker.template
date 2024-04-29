@@ -1,28 +1,51 @@
 #!/bin/bash
 
+# Name of the created image
 #gendocker_name=
+
+# Command to run on container start
 #gendocker_cmd=
-#gendocker_image=
+
+# Base image used in the FROM command
+#gendocker_base_image=
+
+# Timezone (defaults to UTC)
 #gendocker_timezone=
+
+# Boolean for GUI applications
 #gendocker_use_gui
 
+# Target directory for the git clone command
 #git_repo_target_dir=
+
+# Git repo URL
 #git_repo=
 
+# apt-get targets before build (usually build dependencies)
 #pre_build_apt_get=(\
 #)
 
+# Working directory before build
 #pre_build_workdir=
+
+# Commands to run before build
 #pre_build_cmds=(\
 #)
 
+# Working directory for build
 #build_workdir=
+
+# Commands for building the program
 #build_cmds=(\
 #)
 
+# apt-get targets after build
 #post_build_apt_get=(\
 #)
 
+# Working directory after build
 #post_build_workdir=
+
+# Commands to run after build
 #post_build_cmds=(\
 #)
