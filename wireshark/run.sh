@@ -6,6 +6,7 @@ ENTRY_CMD="wireshark"
 # For using GUI
 xhost +local:docker
 USE_GUI="-e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix"
+IF_ACCESS=" --privileged -v /dev:/dev"
 
 # Temp dir
 if [ ! -v TEMPDIR ]; then
@@ -61,6 +62,7 @@ done
 TEMP=$(mktemp -p $TEMPDIR -d)
 
 VOL="-v $TEMP:/host"
+VOL+=$IF_ACCESS
 if [ -v pcaps ]; then
     if [ -d $pcaps ]; then
         VOL+=" -v $pcaps:/pcaps"
